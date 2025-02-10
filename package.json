@@ -1,11 +1,11 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "main": "app.js",
+  "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "nodemon -r dotenv/config --experimental-json-modules app.js",
-    "start": "node app.js"
+    "dev": "nodemon -r dotenv/config --experimental-json-modules index.js",
+    "start": "node index.js"
   },
   "author": "Ayushmaan",
   "license": "ISC",
