@@ -17,21 +17,6 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" }))
 app.use(express.static("public"))
 app.use(cookieParser())
 app.use(morgan("dev"))
-app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "http://localhost:5173")
-    res.header(
-        "Access-Control-Allow-Methods",
-        "GET, POST, PUT, DELETE, OPTIONS"
-    )
-    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization")
-    res.header("Access-Control-Allow-Credentials", "true")
-
-    if (req.method === "OPTIONS") {
-        return res.sendStatus(204)
-    }
-
-    next()
-})
 
 import userRouter from "./routes/user.routes.js"
 import videoRouter from "./routes/video.routes.js"
@@ -42,6 +27,9 @@ import subscriptionRouter from "./routes/subscription.routes.js"
 import tweetRouter from "./routes/tweet.routes.js"
 import dashboardRouter from "./routes/dashboard.routes.js"
 import healthCheckRouter from "./routes/healthCheck.routes.js"
+app.get("/", (req, res) => {
+    res.send("Welcome to the API")
+})
 app.use("/api/v1/user", userRouter)
 app.use("/api/v1/video", videoRouter)
 app.use("/api/v1/comment", commentRouter)
