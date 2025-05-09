@@ -6,7 +6,7 @@ const app = express()
 
 app.use(
     cors({
-        origin: "http://localhost:5173",
+        origin: "https://videotubefrontend.netlify.app/",
         credentials: true, // Allow cookies/auth headers if needed
         methods: "GET,POST,PUT,DELETE,OPTIONS,PATCH",
         allowedHeaders: "Content-Type,Authorization",
