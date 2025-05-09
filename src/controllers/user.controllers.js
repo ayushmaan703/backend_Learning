@@ -116,6 +116,7 @@ const loginUser = asyncHandler(async (req, res) => {
     const options = {
         httpOnly: true,
         secure: true,
+        sameSite: "None",
     }
     return res
         .status(200)
@@ -335,7 +336,9 @@ const getUserChannelInfo = asyncHandler(async (req, res) => {
                     $cond: {
                         if: {
                             $in: [
-                                new mongoose.Types.ObjectId(`${req.user._conditions._id}`),
+                                new mongoose.Types.ObjectId(
+                                    `${req.user._conditions._id}`
+                                ),
                                 "$subscribers.subsciber",
                             ],
                         },
