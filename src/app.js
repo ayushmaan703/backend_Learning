@@ -8,7 +8,7 @@ app.use(
     cors({
         origin: "http://localhost:5173",
         credentials: true, // Allow cookies/auth headers if needed
-        methods: "GET,POST,PUT,DELETE,OPTIONS",
+        methods: "GET,POST,PUT,DELETE,OPTIONS,PATCH",
         allowedHeaders: "Content-Type,Authorization",
     })
 )
