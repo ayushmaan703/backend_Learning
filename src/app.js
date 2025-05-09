@@ -30,6 +30,13 @@ import healthCheckRouter from "./routes/healthCheck.routes.js"
 app.get("/", (req, res) => {
     res.send("Welcome to the API")
 })
+app.use((req, res, next) => {
+    console.log("Headers:", req.headers)
+    console.log("Cookies:", req.cookies)
+    console.log("User-Agent:", req.get("User-Agent"))
+    next()
+})
+
 app.use("/api/v1/user", userRouter)
 app.use("/api/v1/video", videoRouter)
 app.use("/api/v1/comment", commentRouter)
