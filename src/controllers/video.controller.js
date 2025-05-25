@@ -50,73 +50,98 @@ const publishAVideo = asyncHandler(async (req, res) => {
         .json(new APIresponse(200, video, "Video uploaded successfully"))
 })
 const getAllVideos = asyncHandler(async (req, res) => {
-    const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query
-    const addingPipelines = []
+    const {
+        limit = 10,
+        query,
+        userId,
+        lastCreatedAt,
+        sortBy,
+        sortType,
+    } = req.query
+
+    const limitInt = parseInt(limit, 10)
+
+    const pipeline = []
+
     if (query) {
-        addingPipelines.push({
+        const searchStage = {
             $search: {
                 index: "searchVideos",
                 text: {
-                    query: query,
+                    query: query || "",
                     path: ["title", "discription"],
+                    fuzzy: {
+                        maxEdits: 2,
+                        prefixLength: 0,
+                    },
                 },
             },
-        })
-    }
-    if (userId) {
-        if (!isValidObjectId(userId)) {
-            throw new APIerror(400, "Invalid user")
         }
 
-        addingPipelines.push({
-            $match: {
-                owner: new mongoose.Types.ObjectId(`${userId}`),
-            },
-        })
+        if (lastCreatedAt) {
+            searchStage.$search.searchAfter = [new Date(lastCreatedAt)]
+        }
+
+        pipeline.push(searchStage)
     }
+
     if (sortBy && sortType) {
-        addingPipelines.push({
+        pipeline.push({
             $sort: {
                 [sortBy]: sortType === "asc" ? 1 : -1,
             },
         })
     } else {
-        addingPipelines.push({
+        pipeline.push({
             $sort: {
                 createdAt: -1,
             },
         })
     }
-    addingPipelines.push(
+
+    if (userId) {
+        if (!isValidObjectId(userId)) {
+            throw new APIerror(400, "Invalid user")
+        }
+
+        pipeline.push({
+            $match: {
+                owner: new mongoose.Types.ObjectId(userId),
+            },
+        })
+    }
+
+    pipeline.push(
         {
             $lookup: {
                 from: "users",
                 localField: "owner",
                 foreignField: "_id",
                 as: "ownerDetails",
-                pipeline: [
-                    {
-                        $project: {
-                            userName: 1,
-                            avatar:1
-                        },
-                    },
-                ],
+                pipeline: [{ $project: { userName: 1, avatar: 1 } }],
             },
         },
-        {
-            $unwind: "$ownerDetails",
-        }
+        { $unwind: "$ownerDetails" },
+        { $limit: limitInt }
     )
-    const videoAggregate = Video.aggregate(addingPipelines)
-    const options = {
-        page: parseInt(page, 10),
-        limit: parseInt(limit, 10),
-    }
-    const video = await Video.aggregatePaginate(videoAggregate, options)
-    return res
-        .status(200)
-        .json(new APIresponse(200, video, "All videos fetched sucessfully"))
+
+    const results = await Video.aggregate(pipeline)
+
+    // Find `lastCreatedAt` for next page
+    const nextCursor =
+        results.length > 0 ? results[results.length - 1].createdAt : null
+
+    return res.status(200).json(
+        new APIresponse(
+            200,
+            {
+                docs: results,
+                nextCursor, // Pass to client to fetch next page
+                hasNextPage: results.length === limitInt,
+            },
+            "Videos fetched successfully"
+        )
+    )
 })
 //comments are not showing in getVideoById
 const getVideoById = asyncHandler(async (req, res) => {
@@ -181,7 +206,7 @@ const getVideoById = asyncHandler(async (req, res) => {
                     {
                         $project: {
                             userName: 1,
-                            avatar:1,
+                            avatar: 1,
                             isSubscribed: 1,
                             subscriberCount: 1,
                             avatar: 1,
