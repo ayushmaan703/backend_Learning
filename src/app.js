@@ -9,9 +9,8 @@ app.use(
     cors({
         origin: [
             "https://videotubefrontend.netlify.app",
-            "http://localhost:5173",
         ],
-        credentials: true, // Allow cookies/auth headers if needed
+        credentials: true, 
         methods: "GET,POST,PUT,DELETE,OPTIONS,PATCH",
         allowedHeaders: "Content-Type,Authorization",
     })
