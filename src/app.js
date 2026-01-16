@@ -32,7 +32,7 @@ import tweetRouter from "./routes/tweet.routes.js"
 import dashboardRouter from "./routes/dashboard.routes.js"
 import healthCheckRouter from "./routes/healthCheck.routes.js"
 
-app.get("/", (res) => {
+app.get("/", (req,res) => {
     res.send("Welcome to the videoTube API")
 })
 
